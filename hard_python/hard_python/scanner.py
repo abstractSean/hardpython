@@ -1,4 +1,6 @@
+import logging
 import re
+
 
 class Token:
 
@@ -16,6 +18,14 @@ class Token:
             return True
         else:
             return False
+
+    def __repr__(self):
+        return 'Token({}, {}, {}, {})'.format(
+            self.token,
+            self.string,
+            self.begin,
+            self.end,
+        )
 
 class Scanner:
 
@@ -35,7 +45,7 @@ class Scanner:
             if match:
                 begin, end = match.span()
                 return token, start[:end], end
-            return None, start, None
+        return None, start, None
 
     def scan(self, code):
         for line in code:
@@ -44,6 +54,11 @@ class Scanner:
                 token, string, end = self.match(i, line)
                 assert token, "Failed to match line %s" % string
                 if token:
+                    self.script.append(Token(token, string, i, i+end))
                     i += end
-                    self.script.append(Token(token, string, i, end))
+        self.print_tokens()
 
+    def print_tokens(self):
+        for token in self.script:
+            logging.debug(token)
+        

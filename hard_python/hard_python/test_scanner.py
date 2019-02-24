@@ -6,15 +6,16 @@ from .scanner import Token
 @pytest.fixture
 def scanner():
     tokens = [
-        (r"def",                     "DEF"),
-        (r"^[a-zA-Z_][a-zA-Z0-9_]*?", "NAME"),
+        (r"^def",                    "DEF"),
+        (r"^[a-zA-Z_][a-zA-Z0-9_]*", "NAME"),
         (r"^[0-9]+",                 "INTEGER"),
         (r"^\(",                     "LPAREN"),
         (r"^\)",                     "RPAREN"),
         (r"^\+",                     "PLUS"),
         (r"^:",                      "COLON"),
         (r"^,",                      "COMMA"),
-        (r"^\s+",                    "INDENT"),
+        (r"^\s{4}",                  "INDENT"),
+        (r"^\s",                     "SPACE"),
     ]
     return Scanner(tokens)
 
