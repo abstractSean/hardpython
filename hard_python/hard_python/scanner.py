@@ -47,7 +47,19 @@ class Scanner:
                 return token, start[:end], end
         return None, start, None
 
+    def peak(self, i, line):
+        possible_matches = list()
+        start = line[i:]
+        for regex, token in self.TOKENS:
+            match = regex.match(start)
+            if match:
+                begin, end = match.span()
+                possible_matches.append((token, start[:end], end))
+        logging.debug(possible_matches)
+        return possible_matches
+
     def scan(self, code):
+        self._original_code = code
         for line in code:
             i = 0
             while i < len(line):
@@ -57,6 +69,9 @@ class Scanner:
                     self.script.append(Token(token, string, i, i+end))
                     i += end
         self.print_tokens()
+
+    def push(self, token):
+        self.stream.insert(0, token.string) 
 
     def print_tokens(self):
         for token in self.script:
