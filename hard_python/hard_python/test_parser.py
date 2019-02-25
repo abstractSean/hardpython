@@ -1,11 +1,10 @@
 import pytest
 
-from .scanner import Scanner
-from .scanner import Token
+from .parser import *
 
 @pytest.fixture
-def scanner():
-    tokens = [
+def tokens():
+    return [
         (r"^def",                    "DEF"),
         (r"^[a-zA-Z_][a-zA-Z0-9_]*", "NAME"),
         (r"^[0-9]+",                 "INTEGER"),
@@ -17,7 +16,6 @@ def scanner():
         (r"^\s{4}",                  "INDENT"),
         (r"^\s",                     "SPACE"),
     ]
-    return Scanner(tokens)
 
 @pytest.fixture
 def code():
@@ -27,16 +25,13 @@ def code():
         "hello(10, 20)",
     ]
 
-def test_scan(scanner, code):
-    scanner.scan(code)
-    peak = scanner.peak()
-    assert peak == Token('DEF', 'def', 0, 3)
-    match = scanner.match('DEF')
-    assert match == Token('DEF', 'def', 0, 3)
-    peak = scanner.peak()
-    assert peak == Token('SPACE', ' ', 3, 4)
-    scanner.skip()
-    assert scanner.peak() == Token('NAME', 'hello', 4, 9)
-    scanner.push(peak)
-    assert scanner.peak()  == Token('SPACE', ' ', 3, 4)
+def test_grammar_tokens():
+    function = FuncDef('function', 'parameters')
+    printed = function.__repr__()
+    assert printed == 'FuncDef(FUNCDEF, function, parameters)'
+
+def test_parser(tokens, code):
+    parser = Parser(tokens)
+    parser.parse(code)
+
 

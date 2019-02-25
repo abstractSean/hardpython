@@ -30,7 +30,7 @@ class Token:
 class Scanner:
 
     def __init__(self, tokens):
-        self.script = list()
+        self.tokens = list()
         self.TOKENS = list()
 
         for token in tokens:
@@ -38,7 +38,7 @@ class Scanner:
                 (re.compile(token[0]), token[1])
             )
 
-    def match(self, i, line):
+    def scan_match(self, i, line):
         start = line[i:]
         for regex, token in self.TOKENS:
             match = regex.match(start)
@@ -47,33 +47,39 @@ class Scanner:
                 return token, start[:end], end
         return None, start, None
 
-    def peak(self, i, line):
-        possible_matches = list()
-        start = line[i:]
-        for regex, token in self.TOKENS:
-            match = regex.match(start)
-            if match:
-                begin, end = match.span()
-                possible_matches.append((token, start[:end], end))
-        logging.debug(possible_matches)
-        return possible_matches
-
     def scan(self, code):
         self._original_code = code
         for line in code:
             i = 0
             while i < len(line):
-                token, string, end = self.match(i, line)
+                token, string, end = self.scan_match(i, line)
                 assert token, "Failed to match line %s" % string
                 if token:
-                    self.script.append(Token(token, string, i, i+end))
+                    if string != ' ':
+                        self.tokens.append(Token(token, string, i, i+end))
                     i += end
-        self.print_tokens()
+        self.original_tokens = self.tokens
+
+    def match(self, token):
+        if self.tokens[0].token == token:
+            result = self.tokens[0]
+            self.tokens = self.tokens[1:]
+            return result
+        else:
+            assert False, "Failed to match {}".format(token)
+
+    def peek(self):
+        for token in self.TOKENS:
+            if self.tokens[0].token == token[1]:
+                return self.tokens[0]
+        assert False, "Failed to peak any tokens"
 
     def push(self, token):
-        self.stream.insert(0, token.string) 
+        self.tokens.insert(0, token)
+
+    def skip(self):
+        self.tokens = self.tokens[1:]
 
     def print_tokens(self):
-        for token in self.script:
+        for token in self.tokens:
             logging.debug(token)
-        
