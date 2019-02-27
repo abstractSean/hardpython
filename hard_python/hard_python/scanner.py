@@ -70,8 +70,11 @@ class Scanner:
 
     def peek(self):
         for token in self.TOKENS:
-            if self.tokens[0].token == token[1]:
-                return self.tokens[0]
+            try:
+                if self.tokens[0].token == token[1]:
+                    return self.tokens[0]
+            except IndexError:
+                return None
         assert False, "Failed to peak any tokens"
 
     def push(self, token):
